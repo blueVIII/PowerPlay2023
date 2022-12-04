@@ -55,7 +55,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Autonomous1", group = "Concept")
+@Autonomous(name = "Left", group = "Concept")
 public class AprilTag1 extends LinearOpMode
 {
     //movement
