@@ -21,42 +21,25 @@
 
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
-import android.graphics.Path;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 import java.util.ArrayList;
 
 @Autonomous(name = "Left", group = "Concept")
-public class AprilTag1 extends LinearOpMode
+public class LeftSide extends LinearOpMode
 {
     //movement
     private static final double COUNTS_PER_MOTOR_REV = 537.7; //Ticks per rotation for the GoBilda 5202 PLanetary Motor
@@ -201,128 +184,79 @@ public class AprilTag1 extends LinearOpMode
             telemetry.addLine("No tag snapshot available, it was never sighted during the init loop :(");
             telemetry.update();
         }
-
-        /* Actually do something useful */
-        if(tagOfInterest.id == LEFT){
-            TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(startingPose)
-                    .strafeLeft(26)
-                    .forward(54)
-                    .UNSTABLE_addDisplacementMarkerOffset(-25, () -> drive.liftMotor.setPower(1))
-                    .strafeRight(14.5)
-                    .addTemporalMarker(() -> drive.liftMotor.setPower(-0.2))
-                    .waitSeconds(.1)
-                    .addTemporalMarker(() -> {
-                        drive.clawServo.setPosition(0.3);
-                    })
-                    .back(8)
-                    .addTemporalMarker(() -> {
-                        liftToPosition(drive, 400);
-                    })
-                    .addTemporalMarker(() -> {
-                        drive.liftMotor.setPower(0.05);
-                    })
-                    .lineToLinearHeading(new Pose2d(50.5, 0, Math.toRadians(-90)))
-                    .forward(25.5)
-                    .addTemporalMarker(() -> {
-                        drive.clawServo.setPosition(0.5);
-                    })
-                    .waitSeconds(.1)
-                    .addTemporalMarker(() -> liftToPosition(drive, 2000))
-                    .addTemporalMarker(() -> drive.liftMotor.setPower(0.05))
-                    .waitSeconds(.2)
-                    .back(25.5)
-                    .addTemporalMarker(() -> drive.liftMotor.setPower(0.05))
-                    .lineToLinearHeading(new Pose2d(50, 14, Math.toRadians(-180)))
-                    //.UNSTABLE_addDisplacementMarkerOffset(-10, () -> drive.liftMotor.setPower(1))
-                    //.waitSeconds(.5)
-                    .forward(4)
-                    .addTemporalMarker(() -> drive.liftMotor.setPower(-0.4))
-                    .waitSeconds(.25)
-                    .addTemporalMarker(() -> {
-                        drive.clawServo.setPosition(0.3);
-                    })
-                    .back(4)
-                    .addTemporalMarker(() -> {
-                        liftToPosition(drive, 275);
-                    })
-                    .addTemporalMarker(() -> {
-                        drive.liftMotor.setPower(0.05);
-                    })
-                    .lineToLinearHeading(new Pose2d(50.5, 0, Math.toRadians(-90)))
-                    .forward(25.5)
-                    .addTemporalMarker(() -> {
-                        drive.clawServo.setPosition(0.5);
-                    })
-                    .waitSeconds(.1)
-                    .addTemporalMarker(() -> liftToPosition(drive, 1500))
-                    .addTemporalMarker(() -> drive.liftMotor.setPower(0.05))
-                    .back(6)
-                    .lineToLinearHeading(new Pose2d(50, -10, Math.toRadians(-180)))
-                    .forward(4)
-                    .addTemporalMarker(() -> drive.liftMotor.setPower(-0.2))
-                    .waitSeconds(.25)
-                    .addTemporalMarker(() -> {
-                        drive.clawServo.setPosition(0.3);
-                    })
-                    .back(4)
+        TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(startingPose)
+                .strafeLeft(26)
+                .forward(54)
+                .UNSTABLE_addDisplacementMarkerOffset(-25, () -> drive.liftMotor.setPower(1))
+                .strafeRight(14.5)
+                .addTemporalMarker(() -> drive.liftMotor.setPower(-0.2))
+                .waitSeconds(.1)
+                .addTemporalMarker(() -> {
+                    drive.clawServo.setPosition(0.3);
+                })
+                .back(8)
+                .addTemporalMarker(() -> {
+                    liftToPosition(drive, 400);
+                })
+                .addTemporalMarker(() -> {
+                    drive.liftMotor.setPower(0.05);
+                })
+                .lineToLinearHeading(new Pose2d(50.5, 0, Math.toRadians(-90)))
+                .forward(25.5)
+                .addTemporalMarker(() -> {
+                    drive.clawServo.setPosition(0.5);
+                })
+                .waitSeconds(.1)
+                .addTemporalMarker(() -> liftToPosition(drive, 2000))
+                .addTemporalMarker(() -> drive.liftMotor.setPower(0.05))
+                .waitSeconds(.2)
+                .back(25.5)
+                .addTemporalMarker(() -> drive.liftMotor.setPower(0.05))
+                .lineToLinearHeading(new Pose2d(50, 14, Math.toRadians(-180)))
+                //.UNSTABLE_addDisplacementMarkerOffset(-10, () -> drive.liftMotor.setPower(1))
+                //.waitSeconds(.5)
+                .forward(4)
+                .addTemporalMarker(() -> drive.liftMotor.setPower(-0.4))
+                .waitSeconds(.25)
+                .addTemporalMarker(() -> {
+                    drive.clawServo.setPosition(0.3);
+                })
+                .back(4)
+                .addTemporalMarker(() -> {
+                    liftToPosition(drive, 275);
+                })
+                .addTemporalMarker(() -> {
+                    drive.liftMotor.setPower(0.05);
+                })
+                .lineToLinearHeading(new Pose2d(50.5, 0, Math.toRadians(-90)))
+                .forward(25.5)
+                .addTemporalMarker(() -> {
+                    drive.clawServo.setPosition(0.5);
+                })
+                .waitSeconds(.1)
+                .addTemporalMarker(() -> liftToPosition(drive, 1500))
+                .addTemporalMarker(() -> drive.liftMotor.setPower(0.05))
+                .back(6)
+                .lineToLinearHeading(new Pose2d(50, -10, Math.toRadians(-180)))
+                .forward(4)
+                .addTemporalMarker(() -> drive.liftMotor.setPower(-0.2))
+                .waitSeconds(.25)
+                .addTemporalMarker(() -> {
+                    drive.clawServo.setPosition(0.3);
+                })
+                .build();
+        drive.followTrajectorySequence(trajSeq);
+        if (tagOfInterest.id == 1){
+            TrajectorySequence trajSeq1 = drive.trajectorySequenceBuilder(startingPose)
                     .strafeRight(40)
                     .build();
-            drive.followTrajectorySequence(trajSeq);
-        }else if(tagOfInterest.id == MIDDLE){
-            TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(startingPose)
-                    .strafeLeft(26)
-                    .forward(50)
-                    .strafeRight(14.5)
-                    .forward(3)
-                    .addDisplacementMarker(2, () -> {
-                        drive.clawServo.setPosition(0.5);
-                        // This marker runs 20 inches into the trajectory
-                        // Run your action in here!
-                    })
-                    .addTemporalMarker(() -> drive.liftMotor.setPower(1))
-                    .waitSeconds(3)
-                    .forward(3)
-                    .addTemporalMarker(() -> drive.liftMotor.setPower(-0.2))
-                    .waitSeconds(.75)
-                    .addTemporalMarker(() -> {
-                        drive.clawServo.setPosition(0.3);
-                    })
-                    .back(4)
-                    .addTemporalMarker(() -> {
-                        drive.liftMotor.setPower(0);
-                    })
-                    .strafeRight(15)
-                    .turn(Math.toRadians(-90))
-                    .forward(10)
-                    .build();
-            drive.followTrajectorySequence(trajSeq);
-        }else if(tagOfInterest.id == RIGHT){
-            TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(startingPose)
-                    .strafeRight(25)
-                    .forward(50)
-                    .strafeLeft(25)
-                    .turn(Math.toRadians(48))
-                    .forward(5)
-                    .addDisplacementMarker(2, () -> {
-                        drive.clawServo.setPosition(0.5);
-                        // This marker runs 20 inches into the trajectory
-
-                        // Run your action in here!
-                    })
-                    .waitSeconds(3)
-                    .forward(3)
-                    .addTemporalMarker(() -> {
-                        drive.clawServo.setPosition(0.3);
-                    })
-                    .back(10)
-                    .addTemporalMarker(() -> {
-                        drive.liftMotor.setPower(0);
-                    })
-                    .turn(Math.toRadians(-48))
-                    .strafeRight(25)
-                    .build();
-            drive.followTrajectorySequence(trajSeq);
         }
+        if (tagOfInterest.id == 3){
+            TrajectorySequence trajSeq1 = drive.trajectorySequenceBuilder(startingPose)
+                    .strafeLeft(20)
+                    .build();
+        }
+
 
 
         /* You wouldn't have this in your autonomous, this is just to prevent the sample from ending */
