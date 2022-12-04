@@ -55,8 +55,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Left", group = "Concept")
-public class AprilTag1 extends LinearOpMode
+@Autonomous(name = "Right", group = "Concept")
+public class RightSide extends LinearOpMode
 {
     //movement
     private static final double COUNTS_PER_MOTOR_REV = 537.7; //Ticks per rotation for the GoBilda 5202 PLanetary Motor
