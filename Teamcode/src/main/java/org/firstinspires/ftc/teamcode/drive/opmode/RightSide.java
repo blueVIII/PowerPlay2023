@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -43,9 +45,11 @@ public class RightSide extends LinearOpMode{
     int currentPosition;
     int cycle;
     int numberLoop;
+    int cones;
 
     //true == up
     boolean direction = true;
+    double beginTime, currentTime, timeRemaining;
 
     // UNITS ARE METERS
     double tagsize = 0.166;
@@ -53,6 +57,8 @@ public class RightSide extends LinearOpMode{
     int LEFT = 1;
     int MIDDLE = 2;
     int RIGHT = 3;
+    int distanceParking = -15;
+
 
     AprilTagDetection tagOfInterest = null;
     @Override
@@ -70,6 +76,8 @@ public class RightSide extends LinearOpMode{
 
         // all of our trajectories
         // drive forward
+
+
         TrajectorySequence beginning = drive.trajectorySequenceBuilder(startingPose)
                 .forward(48.5,
                         SampleMecanumDrive.getVelocityConstraint(60, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
@@ -100,11 +108,23 @@ public class RightSide extends LinearOpMode{
 
         // april tag initialization
         while (!isStarted() && !isStopRequested()) {
+            timer.reset();
             ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
             if(currentDetections.size() != 0){
                 boolean tagFound = false;
                 for(AprilTagDetection tag : currentDetections) {
-                    if(tag.id == LEFT || tag.id == MIDDLE || tag.id == RIGHT) {
+                    if(tag.id == LEFT){
+                        distanceParking = -15;
+                        tagOfInterest = tag;
+                        tagFound = true;
+                        break;
+                    } else if (tag.id == MIDDLE){
+                        distanceParking = 10;
+                        tagOfInterest = tag;
+                        tagFound = true;
+                        break;
+                    } else if (tag.id == RIGHT) {
+                        distanceParking = 40;
                         tagOfInterest = tag;
                         tagFound = true;
                         break;
@@ -140,32 +160,20 @@ public class RightSide extends LinearOpMode{
             sleep(20);
         }
 
-        waitForStart();
-
+        cones = 0;
         cycle = 0;
         numberLoop = 1;
 
-        while (opModeIsActive()){
+        waitForStart();
+
+        while (opModeIsActive()) {
             distanceInches = drive.distSensor.getDistance(DistanceUnit.INCH);
             telemetry.addData("Distance Inches", distanceInches);
             telemetry.addData("current position", currentPosition);
             telemetry.addData("targetPosition", targetPosition);
+            telemetry.addData("Cycles", cycle);
+            telemetry.addData("Parking Location", distanceParking);
             telemetry.update();
-
-            if (timer.seconds() < 5){
-                TrajectorySequence distanceSensor = drive.trajectorySequenceBuilder(startingPose)
-                        .addTemporalMarker(() -> {
-                            targetPosition = 2900+(cycle*100);
-                            direction=true;
-                        })
-                        .forward(placeHolderDistance - 3.5)
-                        .waitSeconds(0.1)
-                        .addTemporalMarker(() -> {
-                            drive.clawServo.setPosition(0.3);
-                        })
-                        .build();
-            }
-
             if (distanceInches < 10 && numberLoop == 1) {
                 sleep(50);
                 drive.setMotorPower(0);
@@ -175,25 +183,42 @@ public class RightSide extends LinearOpMode{
                 drive.setPoseEstimate(startingPose);
                 TrajectorySequence distanceSensor = drive.trajectorySequenceBuilder(startingPose)
                         .addTemporalMarker(() -> {
-                            targetPosition = 2900+(cycle*100);
-                            direction=true;
+                            targetPosition = 2900 + (cycle * 100);
+                            direction = true;
                         })
                         .forward(placeHolderDistance - 3.5)
-                        .waitSeconds(0.1)
+                        .waitSeconds(0.05)
                         .addTemporalMarker(() -> {
-                            drive.clawServo.setPosition(0.3);
+                            drive.clawServo.setPosition(0.26);
                         })
+                        .UNSTABLE_addTemporalMarkerOffset(1.5, () -> cones++)
                         .build();
                 drive.followTrajectorySequenceAsync(distanceSensor);
                 numberLoop++;
+            }
+            if(cones == 4) {
+                targetPosition = 0;
+                direction = false;
+                numberLoop = 0;
+                drive.breakFollowing();
+                startingPose = new Pose2d(0, 0, Math.toRadians(90));
+                drive.setPoseEstimate(startingPose);
+                TrajectorySequence parking = drive.trajectorySequenceBuilder(startingPose)
+                        .addTemporalMarker(() -> {
+                            drive.liftMotor.setPower(-0.2);
+                        })
+                        .back(3)
+                        .lineToLinearHeading(new Pose2d(distanceParking, -3, Math.toRadians(90)))
+                        .build();
+                drive.followTrajectorySequence(parking);
             }
             if (numberLoop == 2 && !drive.isBusy()) {
                 startingPose = new Pose2d(24.30, -9.17, Math.toRadians(90.00));
                 drive.setPoseEstimate(startingPose);
                 TrajectorySequence goToCone = drive.trajectorySequenceBuilder(startingPose)
                         .addTemporalMarker(() -> {
-                            targetPosition=650-(cycle*75);
-                            direction=false;
+                            targetPosition = 650 - (cycle * 60);
+                            direction = false;
                         })
                         .back(3)
                         .lineToLinearHeading(new Pose2d(35, -12, Math.toRadians(0)),
@@ -203,7 +228,6 @@ public class RightSide extends LinearOpMode{
                         .forward(26,
                                 SampleMecanumDrive.getVelocityConstraint(65, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                 SampleMecanumDrive.getAccelerationConstraint(60))
-                        .waitSeconds(.05)
                         .addTemporalMarker(() -> {
                             drive.clawServo.setPosition(0.5);
                         })
@@ -219,17 +243,15 @@ public class RightSide extends LinearOpMode{
                             targetPosition = 2500;
                             direction = true;
                         })
-                        .waitSeconds(0.05)
                         .back(26,
                                 SampleMecanumDrive.getVelocityConstraint(60, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                 SampleMecanumDrive.getAccelerationConstraint(60))
                         .turn(Math.toRadians(90))
                         .strafeLeft(30)
                         .UNSTABLE_addDisplacementMarkerOffset(-27, () -> {
-                            numberLoop=1;
                             cycle++;
+                            numberLoop = 1;
                         })
-
                         .build();
                 drive.followTrajectorySequenceAsync(backToPole);
             }
